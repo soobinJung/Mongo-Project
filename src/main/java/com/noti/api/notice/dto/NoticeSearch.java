@@ -5,7 +5,7 @@ import java.util.Arrays;
 import lombok.Getter;
 import lombok.Setter;
 
-/* 
+/**
  * 게시판 검색 조건을 정의 합니다.
  */
 @Getter

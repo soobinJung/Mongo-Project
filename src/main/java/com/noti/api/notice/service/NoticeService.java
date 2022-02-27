@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.result.DeleteResult;
@@ -11,6 +13,8 @@ import com.mongodb.client.result.UpdateResult;
 import com.noti.api.notice.dto.NoticeDto;
 import com.noti.api.notice.dto.NoticeSearch;
 import com.noti.api.notice.dto.ReplyDto;
+import com.noti.api.user.dto.UserDto;
+import com.noti.api.user.service.UserService;
 import com.noti.document.Notice;
 import com.noti.util.DateProcess;
 
@@ -28,6 +32,7 @@ import org.springframework.data.mongodb.core.query.Update;
 public class NoticeService {
 
 	MongoTemplate template;
+	UserService userService;
 	DateProcess date;
 	
 	static final String DATEFORMAT = "yyyy/MM/dd";
@@ -76,9 +81,16 @@ public class NoticeService {
 
 	/**
 	 * noticeId 의 게시글 등록
+	 * @throws AuthenticationException 
 	 */
-	public NoticeDto insertNotice( NoticeDto noticeDto ) {
+	public NoticeDto insertNotice( NoticeDto noticeDto ) throws AuthenticationException {
 
+		UserDto user = userService.getUserInfo();
+		
+		if(!user.isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
 		// 몽고는 auto increment 기능 없음 id 생성 
 		long noticeId = template.count(new Query(), Notice.class) + 1;
 		
@@ -87,6 +99,7 @@ public class NoticeService {
 			noticeId ++;
 		} 
 		
+		noticeDto.setUserId(user.getUserId());
 		noticeDto.setNoticeId(noticeId);
 		noticeDto.setCreateDate(date.getTodayDate(DATEFORMAT));
 		noticeDto.setUpdateDate(date.getTodayDate(DATEFORMAT));
@@ -96,8 +109,13 @@ public class NoticeService {
 
 	/**
 	 * noticeId 의 게시글 수정
+	 * @throws AuthenticationException 
 	 */
-	public UpdateResult updateNoticeById(long noticeId, NoticeDto updateDto)  {
+	public UpdateResult updateNoticeById(long noticeId, NoticeDto updateDto) throws AuthenticationException  {
+		
+		if(!userService.getUserInfo().isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
 		
 		Criteria criteria = new Criteria("_id");
 		criteria.is(noticeId);
@@ -113,18 +131,28 @@ public class NoticeService {
 
 	/**
 	 * noticeId 의 게시글 삭제
+	 * @throws AuthenticationException 
 	 */
-	public DeleteResult deleteNoticeByNoticeId(long noticeId) {
+	public DeleteResult deleteNoticeByNoticeId(long noticeId) throws AuthenticationException {
 
+		if(!userService.getUserInfo().isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
 		Query query = new Query(new Criteria("_id").is(noticeId));
 		return template.remove(query,Notice.class);
 	}
 
 	/**
 	 * 게시글의 댓글 등록
+	 * @throws AuthenticationException 
 	 */
-	public NoticeDto insertReplyByNoticeId(long noticeId, ReplyDto replyDto) {
+	public NoticeDto insertReplyByNoticeId(long noticeId, ReplyDto replyDto) throws AuthenticationException {
 
+		if(!userService.getUserInfo().isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
 		NoticeDto noticeDto = getNoticeById(noticeId);
 		
 		// 몽고는 auto increment 기능 없음 id 생성 
@@ -146,6 +174,7 @@ public class NoticeService {
 		} 
 		
 		replyDto.setReplyId(replyId);
+		replyDto.setUserId(userService.getUserInfo().getUserId());
 		noticeDto.getReplyList().add(replyDto);
 		
 		Criteria criteria = new Criteria("_id");
@@ -159,10 +188,44 @@ public class NoticeService {
 	}
 
 	/**
-	 * 게시글의 댓글 삭제
+	 * 게시글의 댓글 수정
+	 * @throws Exception 
 	 */
-	public NoticeDto deleteReplyByReplyId(long noticeId, long replyId) {
+	public NoticeDto updateReplyByReplyId(long noticeId, long replyId, ReplyDto updateDto ) throws AuthenticationException {
 
+		UserDto user = userService.getUserInfo();
+		
+		if(!user.isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
+		NoticeDto noticeDto = getNoticeById(noticeId); 
+		noticeDto.getReplyList().forEach( reply -> {
+			if(reply.getReplyId() == replyId && reply.getUserId() == user.getUserId()) {
+				reply.setReplycontent(updateDto.getReplycontent());
+			}
+		});
+		
+		Criteria criteria = new Criteria("_id");
+		criteria.is(noticeId);
+		
+		Update update = new Update();
+		update.set("replyList", noticeDto.getReplyList().stream().map(x -> x.toEntity()).collect(Collectors.toList()));
+		template.updateFirst( new Query(criteria), update, Notice.class );
+		
+		return noticeDto;
+	}
+	
+	/**
+	 * 게시글의 댓글 삭제
+	 * @throws Exception 
+	 */
+	public NoticeDto deleteReplyByReplyId(long noticeId, long replyId) throws AuthenticationException {
+
+		if(!userService.getUserInfo().isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
 		NoticeDto noticeDto = getNoticeById(noticeId); 
 		Iterator<ReplyDto> it = noticeDto.getReplyList().iterator();
 		while (it.hasNext()) {

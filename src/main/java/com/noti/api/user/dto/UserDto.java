@@ -7,12 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
 @Builder
-@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
@@ -22,6 +20,7 @@ public class UserDto {
 	private String userName;
 	private String userPwd;
 	private String userAdminLevel;
+	
 	private String createDate;
 	private String updateDate;
 	private boolean loginState;

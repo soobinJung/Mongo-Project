@@ -1,5 +1,7 @@
 package com.noti.api.notice.controller;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +17,6 @@ import com.mongodb.client.result.UpdateResult;
 import com.noti.api.notice.dto.NoticeDto;
 import com.noti.api.notice.dto.NoticeSearch;
 import com.noti.api.notice.dto.ReplyDto;
-import com.noti.api.notice.repository.NoticeRepository;
 import com.noti.api.notice.service.NoticeService;
 
 import lombok.AllArgsConstructor;
@@ -26,7 +27,6 @@ import lombok.AllArgsConstructor;
 public class NoticeController {
 
 	NoticeService service;
-	NoticeRepository repository;
 	
 	@GetMapping("")
 	@ResponseBody
@@ -38,7 +38,7 @@ public class NoticeController {
 
 	@GetMapping("/{noticeId}")
 	@ResponseBody
-	public ResponseEntity<NoticeDto> getNoticeByNoticeId( @PathVariable(name = "noticeId", required = true) long noticeId ) {
+	public ResponseEntity<NoticeDto> getNoticeByNoticeId(@PathVariable(name = "noticeId", required = true) long noticeId) {
 		return ResponseEntity.ok().body(
 			service.getNoticeById(noticeId)
 		);
@@ -46,7 +46,7 @@ public class NoticeController {
 	
 	@PostMapping("")
 	@ResponseBody
-	public ResponseEntity<NoticeDto> insertNotice( NoticeDto noticeDto ) {
+	public ResponseEntity<NoticeDto> insertNotice(NoticeDto noticeDto) throws AuthenticationException {
 		return ResponseEntity.ok().body(
 			service.insertNotice(noticeDto)
 		);
@@ -54,7 +54,7 @@ public class NoticeController {
 	
 	@PatchMapping("/{noticeId}")
 	@ResponseBody
-	public ResponseEntity<UpdateResult> updateNoticeById( @PathVariable(name = "noticeId", required = true) long noticeId, NoticeDto noticeDto ) {
+	public ResponseEntity<UpdateResult> updateNoticeById(@PathVariable(name = "noticeId", required = true) long noticeId, NoticeDto noticeDto ) throws AuthenticationException {
 		return ResponseEntity.ok().body(
 			service.updateNoticeById(noticeId, noticeDto)
 		);
@@ -62,7 +62,7 @@ public class NoticeController {
 	
 	@DeleteMapping("/{noticeId}")
 	@ResponseBody
-	public ResponseEntity<DeleteResult> deleteNoticeByNoticeId( @PathVariable(name = "noticeId", required = true) long noticeId ) {
+	public ResponseEntity<DeleteResult> deleteNoticeByNoticeId(@PathVariable(name = "noticeId", required = true) long noticeId ) throws AuthenticationException {
 		return ResponseEntity.ok().body(
 			service.deleteNoticeByNoticeId(noticeId)
 		);
@@ -70,16 +70,25 @@ public class NoticeController {
 	
 	@PostMapping("/{noticeId}/reply")
 	@ResponseBody
-	public ResponseEntity<NoticeDto> insertReplyByNoticeId( @PathVariable(name = "noticeId", required = true) long noticeId, ReplyDto replyDto) {
+	public ResponseEntity<NoticeDto> insertReplyByNoticeId(@PathVariable(name = "noticeId", required = true) long noticeId, ReplyDto replyDto) throws AuthenticationException {
 		
 		return ResponseEntity.ok().body(
 			service.insertReplyByNoticeId(noticeId, replyDto)
 		);
 	}
 	
+	@PatchMapping("/{noticeId}/reply/{replyId}")
+	@ResponseBody
+	public ResponseEntity<NoticeDto> updateReplyByReplyId(@PathVariable(name = "noticeId", required = true) long noticeId, @PathVariable(name = "replyId", required = true) long replyId, ReplyDto replyDto) throws AuthenticationException {
+		
+		return ResponseEntity.ok().body(
+			service.updateReplyByReplyId(noticeId, replyId, replyDto)
+		);
+	}
+	
 	@DeleteMapping("/{noticeId}/reply/{replyId}")
 	@ResponseBody
-	public ResponseEntity<NoticeDto> deleteReplyByReplyId( @PathVariable(name = "noticeId", required = true) long noticeId, @PathVariable(name = "replyId", required = true) long replyId) {
+	public ResponseEntity<NoticeDto> deleteReplyByReplyId(@PathVariable(name = "noticeId", required = true) long noticeId, @PathVariable(name = "replyId", required = true) long replyId) throws AuthenticationException {
 		
 		return ResponseEntity.ok().body(
 			service.deleteReplyByReplyId(noticeId, replyId)
