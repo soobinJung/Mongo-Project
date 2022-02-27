@@ -132,7 +132,10 @@ public class UserService {
 		userDto.setCreateDate(date.getTodayDate(DATEFORMAT));
 		userDto.setUpdateDate(date.getTodayDate(DATEFORMAT));
 		
-		return new UserDto(template.insert(userDto.toEntity()));
+		UserDto user = new UserDto(template.insert(userDto.toEntity()));
+		user.setStateMsg("Sign Up Success");
+		
+		return user;
 	}
 	
 	/**
