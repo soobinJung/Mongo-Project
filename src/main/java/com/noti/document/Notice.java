@@ -14,6 +14,7 @@ public class Notice {
 
 	private long _id;
 	
+	private long userId;
 	private String noticeTitle;
 	private String noticeContent;
 	private String noticeImageFile;
