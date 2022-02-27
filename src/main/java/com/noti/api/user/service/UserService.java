@@ -13,9 +13,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.noti.api.user.dto.UserDto;
 import com.noti.api.users.dto.UserSearch;
+import com.noti.document.Notice;
 import com.noti.document.User;
 import com.noti.util.DateProcess;
 
@@ -167,5 +169,17 @@ public class UserService {
 		update.set("updateDate", date.getTodayDate(DATEFORMAT));
 		
 		return template.updateFirst( new Query(criteria), update, User.class ); 
+	}
+	
+	/**
+	 * 회원정보 삭제
+	 */
+	public DeleteResult userDelete(long userId) throws AuthenticationException{
+		if(!getUserInfo().isLoginState()) {
+			throw new AuthenticationException("No Login");
+		}
+		
+		Query query = new Query(new Criteria("_id").is(userId));
+		return template.remove(query,User.class);
 	}
 }
