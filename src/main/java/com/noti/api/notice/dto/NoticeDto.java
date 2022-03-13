@@ -3,6 +3,7 @@ package com.noti.api.notice.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.noti.api.user.dto.UserDto;
 import com.noti.document.Notice;
 import com.noti.document.Reply;
 
@@ -21,14 +22,17 @@ public class NoticeDto {
 
 	private long noticeId;
 	private long userId;
+	
 	private String noticeTitle;
 	private String noticeContent;
 	private String noticeImageFile;
+	private int noticeCount;
 	private List<ReplyDto> replyList;
 	
 	private String createDate;
 	private String updateDate;
 	
+	private UserDto user;
 
 	public NoticeDto ( Notice notice ) {
 		if(notice != null) {
@@ -37,9 +41,11 @@ public class NoticeDto {
 			this.noticeTitle = notice.getNoticeTitle();
 			this.noticeContent = notice.getNoticeContent();
 			this.noticeImageFile = notice.getNoticeImageFile();
+			this.noticeCount = notice.getNoticeCount();
 			this.createDate = notice.getCreateDate();
 			this.updateDate = notice.getUpdateDate();
 			this.replyList = new ArrayList<>();
+			this.user = new UserDto();
 			
 			// 댓글 형변환 
 			if(notice.getReplyList() != null && notice.getReplyList().size() > 0) {
@@ -59,6 +65,7 @@ public class NoticeDto {
 				.noticeTitle(this.noticeTitle)
 				.noticeContent(this.noticeContent)
 				.noticeImageFile(this.noticeImageFile)
+				.noticeCount(this.noticeCount)
 				.createDate(this.createDate)
 				.updateDate(this.updateDate)
 				.replyList(new ArrayList<Reply>())

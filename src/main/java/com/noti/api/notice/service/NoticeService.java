@@ -66,7 +66,14 @@ public class NoticeService {
 			qurey.skip( (noticeSearch.getPage() - 1 ) * 10 );
 		}
 		
-		return template.find(qurey, Notice.class).stream().map(vo -> new NoticeDto(vo)).collect(Collectors.toList());
+		List<NoticeDto> noticeList = template.find(qurey, Notice.class).stream().map(vo -> new NoticeDto(vo)).collect(Collectors.toList());
+		
+		// 사용자 정보 세팅
+		noticeList.forEach( x -> {
+			x.setUser(userService.getUserInfo(x.getUserId()));
+		});
+		
+		return noticeList;
 	}
 
 	/**
@@ -75,8 +82,20 @@ public class NoticeService {
 	public NoticeDto getNoticeById(long noticeId) {
 		Criteria criteria = new Criteria("_id");
 		criteria.is(noticeId);
+		
 		Query query = new Query(criteria);
-		return new NoticeDto(template.findOne(query, Notice.class));
+		NoticeDto noticeDto = new NoticeDto(template.findOne(query, Notice.class));
+		
+		// 조회수 증가
+		Update update = new Update();
+		update.set("noticeCount", noticeDto.getNoticeCount() + 1 );
+		template.updateFirst( new Query(criteria), update, Notice.class );
+		
+		// 사용자 정보 세팅
+		NoticeDto notice = new NoticeDto(template.findOne(query, Notice.class));
+		notice.setUser(userService.getUserInfo(notice.getUserId()));
+		
+		return notice;
 	}
 
 	/**
@@ -101,10 +120,17 @@ public class NoticeService {
 		
 		noticeDto.setUserId(user.getUserId());
 		noticeDto.setNoticeId(noticeId);
+		noticeDto.setNoticeCount(0);
 		noticeDto.setCreateDate(date.getTodayDate(DATEFORMAT));
 		noticeDto.setUpdateDate(date.getTodayDate(DATEFORMAT));
 		
-		return new NoticeDto(template.insert(noticeDto.toEntity()));
+		// 게시물 등록
+		noticeDto = new NoticeDto(template.insert(noticeDto.toEntity()));
+		
+		// 사용자 정보 세팅
+		noticeDto.setUser(userService.getUserInfo(noticeDto.getUserId()));
+		
+		return noticeDto;
 	}
 
 	/**
@@ -122,8 +148,8 @@ public class NoticeService {
 		
 		Update update = new Update();
 		update.set("noticeTitle", updateDto.getNoticeTitle());
-		update.set("noticeContent", updateDto.getNoticeTitle());
-		update.set("noticeImageFile", updateDto.getNoticeTitle());
+		update.set("noticeContent", updateDto.getNoticeContent());
+		update.set("noticeImageFile", updateDto.getNoticeImageFile());
 		update.set("updateDate", date.getTodayDate(DATEFORMAT));
 		
 		return template.updateFirst( new Query(criteria), update, Notice.class );
@@ -175,6 +201,8 @@ public class NoticeService {
 		
 		replyDto.setReplyId(replyId);
 		replyDto.setUserId(userService.getUserInfo().getUserId());
+		replyDto.setCreateDate(date.getTodayDate(DATEFORMAT));
+		replyDto.setUpdateDate(date.getTodayDate(DATEFORMAT));
 		noticeDto.getReplyList().add(replyDto);
 		
 		Criteria criteria = new Criteria("_id");
@@ -183,6 +211,9 @@ public class NoticeService {
 		Update update = new Update();
 		update.set("replyList", noticeDto.getReplyList().stream().map(x -> x.toEntity()).collect(Collectors.toList()));
 		template.updateFirst( new Query(criteria), update, Notice.class );
+		
+		// 사용자 정보 세팅
+		noticeDto.setUser(userService.getUserInfo(noticeDto.getUserId()));
 		
 		return noticeDto;
 	}
@@ -203,6 +234,7 @@ public class NoticeService {
 		noticeDto.getReplyList().forEach( reply -> {
 			if(reply.getReplyId() == replyId && reply.getUserId() == user.getUserId()) {
 				reply.setReplycontent(updateDto.getReplycontent());
+				reply.setUpdateDate(date.getTodayDate(DATEFORMAT));
 			}
 		});
 		
@@ -213,6 +245,9 @@ public class NoticeService {
 		update.set("replyList", noticeDto.getReplyList().stream().map(x -> x.toEntity()).collect(Collectors.toList()));
 		template.updateFirst( new Query(criteria), update, Notice.class );
 		
+		// 사용자 정보 세팅
+		noticeDto.setUser(userService.getUserInfo(noticeDto.getUserId()));
+				
 		return noticeDto;
 	}
 	
@@ -241,6 +276,9 @@ public class NoticeService {
 		update.set("replyList", noticeDto.getReplyList().stream().map(x -> x.toEntity()).collect(Collectors.toList()));
 		template.updateFirst( new Query(criteria), update, Notice.class );
 		
+		// 사용자 정보 세팅
+		noticeDto.setUser(userService.getUserInfo(noticeDto.getUserId()));
+				
 		return noticeDto;
 	}
 }

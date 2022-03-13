@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import com.noti.api.notice.dto.NoticeDto;
 import com.noti.api.user.dto.UserDto;
 import com.noti.api.users.dto.UserSearch;
 import com.noti.document.Notice;
@@ -181,5 +182,20 @@ public class UserService {
 		
 		Query query = new Query(new Criteria("_id").is(userId));
 		return template.remove(query,User.class);
+	}
+	
+	/**
+	 * 특정 사용자 조회
+	 */
+	public UserDto getUserInfo (long userId) {
+		
+		Criteria criteria = new Criteria("_id");
+		criteria.is(userId);
+		
+		Query query = new Query(criteria);
+		UserDto userDto = new UserDto(template.findOne(query, User.class));
+		userDto.setUserPwd("");
+		
+		return userDto;
 	}
 }

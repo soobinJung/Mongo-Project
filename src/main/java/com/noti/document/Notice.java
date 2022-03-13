@@ -18,6 +18,7 @@ public class Notice {
 	private String noticeTitle;
 	private String noticeContent;
 	private String noticeImageFile;
+	private int noticeCount;
 	private String createDate;
 	private String updateDate;
 	private List<Reply> replyList;

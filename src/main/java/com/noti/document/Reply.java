@@ -12,5 +12,5 @@ public class Reply {
 	private long userId;
 	private String replycontent;
 	private String createDate;
-	
+	private String updateDate;
 }

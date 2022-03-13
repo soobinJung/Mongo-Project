@@ -19,12 +19,14 @@ public class ReplyDto {
 	private long userId;
 	private String replycontent;
 	private String createDate;
+	private String updateDate;
 	
 	public ReplyDto(Reply reply) {
 		this.replyId = reply.getReplyId();
 		this.userId = reply.getUserId();
 		this.replycontent = reply.getReplycontent();
 		this.createDate = reply.getCreateDate();
+		this.updateDate = reply.getUpdateDate();
 	}
 	
 	public Reply toEntity() {
@@ -33,6 +35,7 @@ public class ReplyDto {
 				.userId(this.userId)
 				.replycontent(this.replycontent)
 				.createDate(this.createDate)
+				.updateDate(this.updateDate)
 				.build();
 	}
 }
