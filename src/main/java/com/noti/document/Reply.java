@@ -1,6 +1,5 @@
 package com.noti.document;
 
-
 import lombok.Builder;
 import lombok.Data;
 

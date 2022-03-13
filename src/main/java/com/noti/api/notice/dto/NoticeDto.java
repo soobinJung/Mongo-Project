@@ -22,16 +22,15 @@ public class NoticeDto {
 
 	private long noticeId;
 	private long userId;
+	private int noticeCount;
 	
 	private String noticeTitle;
 	private String noticeContent;
 	private String noticeImageFile;
-	private int noticeCount;
-	private List<ReplyDto> replyList;
-	
 	private String createDate;
 	private String updateDate;
 	
+	private List<ReplyDto> replyList;
 	private UserDto user;
 
 	public NoticeDto ( Notice notice ) {

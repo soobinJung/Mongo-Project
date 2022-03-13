@@ -13,13 +13,15 @@ import lombok.Data;
 public class Notice {
 
 	private long _id;
-	
 	private long userId;
+	
+	private int noticeCount;
+	
 	private String noticeTitle;
 	private String noticeContent;
 	private String noticeImageFile;
-	private int noticeCount;
 	private String createDate;
 	private String updateDate;
+	
 	private List<Reply> replyList;
 }
